@@ -20,7 +20,10 @@ initState();
 //if(!localStorage.getItem('reportState')){
     localStorage.setItem('reportState',reportState);
 //}
-
+//convert all forms to a single report JSON
+var reportToJSON = function(){
+	//foreach
+};
 //TODO: Bug where previous zone features getting overwritten
 var updateReportState = function(zoneName, featName, data){
     if(typeof reportState.zones[zoneName] !== 'undefined'){
@@ -36,14 +39,20 @@ var updateReportState = function(zoneName, featName, data){
     renderReport();
 };
 var removeReportStateFeat = function(zoneName, featName){
-    //zoneName='Kitchen';
-    //featName='stove';
     if(typeof reportState.zones[zoneName] !== 'undefined'){
 		if(typeof reportState.zones[zoneName].feats[featName] !== 'undefined'){
-		    delete reportState.zones[zoneName].feats[featName];
+			delete reportState.zones[zoneName].feats[featName];
+			//TODO: Bug - cannot detect size of zone to see if zone should be deleted
+			//removeReportStateZone(zoneName);
 		    renderReport();
 		}
     }
+}
+var removeReportStateZone = function(zoneName){
+    if(typeof reportState.zones[zoneName] !== 'undefined'){
+		delete reportState.zones[zoneName];
+		renderReport();
+	}
 }
 var updateReportSelectZone = function(zoneName){
     setReportStateSelectZone(zoneName);
@@ -113,7 +122,7 @@ var DeleteFeat = React.createClass({
 
 var Feat = React.createClass({
 	render: function(){
-		var feats = this.props.data
+		var feats = this.props.data;
 		var zoneName = this.props.zoneName;
 		return(
 		    <div className="report-body-zone-feat">
@@ -166,10 +175,6 @@ var SelectZone = React.createClass({
 		e.preventDefault();
 		updateReportSelectZone(this.refs.selectZone.value);
     },
-    handleDeleteZone: function(e){
-		e.preventDefault();
-		removeReportStateFeat();
-    },
     render: function(){
 		var selectableZones = this.props.data;
 		return(
@@ -184,7 +189,6 @@ var SelectZone = React.createClass({
 					    </option>);
 				    })}
 				</select>
-				<a href="#" onClick={this.handleDeleteZone}>Delete Zone</a>
 			    </div>
 			    <SelectFeat data={selectableZones}/>
 			</div>
@@ -193,7 +197,11 @@ var SelectZone = React.createClass({
 });
 
 var Zone = React.createClass({
-    render: function(){
+	handleDeleteZone: function(e){
+		e.preventDefault();
+		removeReportStateZone(this.props.dataName);
+    },
+	render: function(){
 	feats = this.props.data;
 	zoneName = this.props.dataName;
 	return(
@@ -201,6 +209,7 @@ var Zone = React.createClass({
 		{Object.keys(feats).map(function (key){
 		    return(<Feat data={feats[key]} dataName={key} zoneName={zoneName}/>);
 		})}
+		<a href="#" onClick={this.handleDeleteZone}>Delete Zone</a>
 	    </div>
 	);
     }
@@ -234,6 +243,15 @@ var ReportHeader = React.createClass({
     }
 });
 
+var ReportSubmit = React.createClass({
+	save: function(){
+		reportToJSON();
+	},
+	render: function(){
+		return(<button type="button" value="Save Report" onClick={this.save}></button>);
+	}
+});
+
 var Report = React.createClass({
 	render: function(){
 
@@ -242,6 +260,7 @@ var Report = React.createClass({
 	    <div className="report-container">
 			<ReportHeader data={this.props.reportData.header}/>
 			<ReportBody data={this.props.reportData.zones}/>
+			<ReportSubmit/>
 	    </div>
 	);
     }
