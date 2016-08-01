@@ -3,11 +3,20 @@ var ReactDOM = require('react-dom');
 var Form = require('react-jsonschema-form');
 //var bootstrap = require('bootstrap');
 
-var reportState = {};
+var reportState;
 
 //Test Report State Data (updated as user updates information)
+var init = function(){
+	if(!localStorage.getItem('reportState')){
+		initState();
+		localStorage.setItem('reportState',reportState);
+	} else {
+		reportState = localStorage.getItem('reportState');
+	}
+};
+
 var initState = function(){
-    reportState = {
+	reportState = {
 		header:{},
 		zones:{},
 		selects:{
@@ -15,14 +24,14 @@ var initState = function(){
 		    feat: ""
 		}
     };
-}
-initState();
-//if(!localStorage.getItem('reportState')){
-    localStorage.setItem('reportState',reportState);
-//}
+};
+
 //convert all forms to a single report JSON
 var reportToJSON = function(){
 	//foreach
+};
+var setReportStateData = function(reportState){
+	localStorage.setItem('reportState',reportState);
 };
 //TODO: Bug where previous zone features getting overwritten
 var updateReportState = function(zoneName, featName, data){
@@ -42,6 +51,7 @@ var removeReportStateFeat = function(zoneName, featName){
     if(typeof reportState.zones[zoneName] !== 'undefined'){
 		if(typeof reportState.zones[zoneName].feats[featName] !== 'undefined'){
 			delete reportState.zones[zoneName].feats[featName];
+			//reportState.zones[zoneName].feats = reportState.zones[zoneName].feats || {};
 			//TODO: Bug - cannot detect size of zone to see if zone should be deleted
 			//removeReportStateZone(zoneName);
 		    renderReport();
@@ -121,6 +131,9 @@ var DeleteFeat = React.createClass({
 });
 
 var Feat = React.createClass({
+	handleSubmit: function(e){
+		e.preventDefault();
+	},
 	render: function(){
 		var feats = this.props.data;
 		var zoneName = this.props.zoneName;
@@ -131,7 +144,8 @@ var Feat = React.createClass({
 				<div>
 				    <Form schema={feats[key].schema}
 					uiSchema={feats[key].uiSchema}
-					formData={feats[key].formData}/>
+					formData={feats[key].formData}
+					onSubmit={this.handleSubmit}/>
 					<DeleteFeat data={key} zoneName={zoneName}/>
 				</div>);
 			})}
@@ -270,14 +284,8 @@ var renderReport = function(){
     ReactDOM.render(<Report reportData={getReportData()}/>, document.getElementById('forms'));
 }
 if (typeof(Storage) !== "undefined"){
-    initState();
+    init();
     renderReport();
 } else {
    ReactDOM.render(<h2>Your Browser does not support Local Storage</h2>, document.getElementById('forms'));
 }
-
-/*
-onChange={log("changed")}
-onSubmit={log("submitted")}
-onError={log("errors")}
-*/
