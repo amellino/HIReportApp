@@ -3,15 +3,28 @@ var ReactDOM = require('react-dom');
 var Form = require('react-jsonschema-form');
 //var bootstrap = require('bootstrap');
 
-var reportState;
+var reportState = {};
+var database = {};
 
+var setStorageJSON = function(key, val){
+	localStorage.setItem(key,JSON.stringify(val));
+};
+var getStorageJSON = function(key){
+	return JSON.parse(localStorage.getItem(key));
+};
 //Test Report State Data (updated as user updates information)
 var init = function(){
 	if(!localStorage.getItem('reportState')){
 		initState();
-		localStorage.setItem('reportState',reportState);
+		setStorageJSON('reportState',reportState);
 	} else {
-		reportState = localStorage.getItem('reportState');
+		reportState = getStorageJSON('reportState');
+	}
+
+	if(!localStorage.getItem('database')){
+		setStorageJSON('database',database);
+	} else {
+		database = getStorageJSON('database');
 	}
 };
 
@@ -26,12 +39,12 @@ var initState = function(){
     };
 };
 
-//convert all forms to a single report JSON
-var reportToJSON = function(){
-	//foreach
+var setDatabase = function(){
+	setStorageJSON('database',getStorageJSON('reportState'));
 };
+
 var setReportStateData = function(reportState){
-	localStorage.setItem('reportState',reportState);
+	setStorageJSON('reportState',reportState);
 };
 //TODO: Bug where previous zone features getting overwritten
 var updateReportState = function(zoneName, featName, data){
@@ -45,34 +58,42 @@ var updateReportState = function(zoneName, featName, data){
     }
     console.log(reportState);
     resetReportStateSelects();
-    renderReport();
+    //renderReport();
+};
+
+var updateReportStateZone = function(zoneName, data){
+    if(typeof reportState.zones[zoneName] !== 'undefined'){
+	reportState.zones[zoneName].feats = data;
+    } else {
+	console.log('zone does not exist');
+	reportState.zones[zoneName] = {};
+	reportState.zones[zoneName].feats = data;
+    }
+    console.log(reportState);
+    resetReportStateSelects();
 };
 var removeReportStateFeat = function(zoneName, featName){
     if(typeof reportState.zones[zoneName] !== 'undefined'){
 		if(typeof reportState.zones[zoneName].feats[featName] !== 'undefined'){
 			delete reportState.zones[zoneName].feats[featName];
-			//reportState.zones[zoneName].feats = reportState.zones[zoneName].feats || {};
 			//TODO: Bug - cannot detect size of zone to see if zone should be deleted
 			//removeReportStateZone(zoneName);
-		    renderReport();
 		}
     }
 }
 var removeReportStateZone = function(zoneName){
     if(typeof reportState.zones[zoneName] !== 'undefined'){
 		delete reportState.zones[zoneName];
-		renderReport();
 	}
 }
 var updateReportSelectZone = function(zoneName){
     setReportStateSelectZone(zoneName);
-    localStorage.setItem('reportState',reportState);
-    renderReport();
+    setReportStateData(reportState);
 }
 var updateReportSelectFeat = function(featName){
     setReportStateSelectFeat(featName);
     var featData = getFeature(reportState.selects.zone,reportState.selects.feat);
-    localStorage.setItem('reportState',reportState);
+    setReportStateData(reportState);
     updateReportState(reportState.selects.zone,reportState.selects.feat,featData);
 }
 var resetReportStateSelects = function(){
@@ -131,6 +152,13 @@ var DeleteFeat = React.createClass({
 });
 
 var Feat = React.createClass({
+	setInitialState: function (){
+		//{}
+	},
+	handleChange:function(){
+		console.log('FORM CHANGE');
+		//updateReportStateZone(zoneName,formData);
+	},
 	handleSubmit: function(e){
 		e.preventDefault();
 	},
@@ -145,7 +173,9 @@ var Feat = React.createClass({
 				    <Form schema={feats[key].schema}
 					uiSchema={feats[key].uiSchema}
 					formData={feats[key].formData}
-					onSubmit={this.handleSubmit}/>
+					onChange={console.log('changed')}
+					onSubmit={this.handleSubmit}
+					liveValidate={true}/>
 					<DeleteFeat data={key} zoneName={zoneName}/>
 				</div>);
 			})}
@@ -259,7 +289,7 @@ var ReportHeader = React.createClass({
 
 var ReportSubmit = React.createClass({
 	save: function(){
-		reportToJSON();
+		setDatabase();
 	},
 	render: function(){
 		return(<button type="button" value="Save Report" onClick={this.save}></button>);
@@ -267,25 +297,51 @@ var ReportSubmit = React.createClass({
 });
 
 var Report = React.createClass({
+	setInitialState: function(){
+		return: getReportData();
+	},
+	updateData:function(zoneName,featName,data){
+		updateReportState(zoneName,featName,data);
+		this.setState(reportState);
+	},
+	updateZoneData:function(zoneName,data){
+		updateReportStateZone(zoneName,data);
+		this.setState(reportState);
+	},
+	updateSelectZone:function(zoneName){
+		updateReportSelectZone(zoneName);
+		this.setState(reportState);
+	},
+	updateSelectFeat:function(featName){
+		updateReportSelectFeat(featName);
+		this.setState(reportState);
+	},
+	removeReportZone:function(zoneName){
+		removeReportStateZone(zoneName);
+		this.setState(reportState);
+	},
+	removeReportFeat:function(zoneName,featName){
+		removeReportFeat(zoneName,featName);
+		this.setState(reportState);
+	},
 	render: function(){
-
-	//display report header and footer classes
-	return (
-	    <div className="report-container">
-			<ReportHeader data={this.props.reportData.header}/>
-			<ReportBody data={this.props.reportData.zones}/>
-			<ReportSubmit/>
-	    </div>
-	);
+		//display report header and footer classes
+		return (
+		    <div className="report-container">
+				<ReportHeader data={this.state.header}/>
+				<ReportBody data={this.state.zones}/>
+				<ReportSubmit/>
+		    </div>
+		);
     }
 });
 
-var renderReport = function(){
-    ReactDOM.render(<Report reportData={getReportData()}/>, document.getElementById('forms'));
-}
 if (typeof(Storage) !== "undefined"){
     init();
-    renderReport();
+	setStorageJSON('reportState',reportState);
+	ReactDOM.render(<Report />, document.getElementById('forms'));
 } else {
    ReactDOM.render(<h2>Your Browser does not support Local Storage</h2>, document.getElementById('forms'));
 }
+
+module.exports = Report;
