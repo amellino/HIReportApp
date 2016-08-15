@@ -62,7 +62,7 @@ var updateReportState = function(zoneName, featName, data){
 		reportState.zones[zoneName].feats[featName] = data;
     }
     resetReportStateSelects();
-	setReportStateData(reportState);
+		setReportStateData(reportState);
     renderReport();
 };
 
@@ -76,6 +76,7 @@ var updateReportStateZone = function(zoneName, data){
     }
     console.log(reportState);
     resetReportStateSelects();
+		setReportStateData(reportState);
     renderReport();
 };
 var removeReportStateFeat = function(zoneName, featName){
@@ -85,6 +86,7 @@ var removeReportStateFeat = function(zoneName, featName){
 			//reportState.zones[zoneName].feats = reportState.zones[zoneName].feats || {};
 			//TODO: Bug - cannot detect size of zone to see if zone should be deleted
 			//removeReportStateZone(zoneName);
+				setReportStateData(reportState);
 		    renderReport();
 		}
     }
@@ -92,6 +94,7 @@ var removeReportStateFeat = function(zoneName, featName){
 var removeReportStateZone = function(zoneName){
     if(typeof reportState.zones[zoneName] !== 'undefined'){
 		delete reportState.zones[zoneName];
+		setReportStateData(reportState);
 		renderReport();
 	}
 };
@@ -151,8 +154,8 @@ var FormWrapper = React.createClass({
 	},
 	handleSubmit: function({formData}){
 		//e.preventDefault();
-		console.log(formData);
-		updateReportState(this.props.zoneName,this.props.featName,formData);
+		//console.log(formData);
+		//updateReportState(this.props.zoneName,this.props.featName,formData.zones);
 	},
 	render: function(){
 		return(
@@ -249,7 +252,7 @@ var Zone = React.createClass({
 	handleDeleteZone: function(e){
 		e.preventDefault();
 		removeReportStateZone(this.props.dataName);
-    },
+  },
 	render: function(){
 	feats = this.props.data;
 	zoneName = this.props.dataName;
