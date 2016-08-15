@@ -3,6 +3,7 @@ var ReactDOM = require('react-dom');
 var Form = require('react-jsonschema-form');
 //var bootstrap = require('bootstrap');
 
+var formJSON = {header:{schema:{type:"object",properties:{address:{type:"string",title:"Address"},propetyType:{type:"string",title:"Property Type"},subType:{type:"string",title:"Sub Type"}}},uiSchema:{description:{"ui:widget":"textarea"}},formData:{}},zones:{Kitchen:{feats:{stove:{schema:{type:"object",properties:{stove:{title:"Stove",type:"object",required:["type"],properties:{type:{type:"string",title:"Name"},condition:{type:"string",title:"Condition",default:"",enum:["","Excellent","Good","Acceptable","Poor"]},image:{type:"string",title:"image",default:"Image URL"},description:{type:"string",title:"Description"},other:{type:"array",title:"Other",items:{type:"object",properties:{item:{type:"string",title:"Item"},details:{type:"string",title:"Details"}}}}}}}},uiSchema:{description:{"ui:widget":"textarea"},details:{"ui:widget":"textarea"}},formData:{}},counters:{schema:{type:"object",properties:{counters:{title:"Counter",type:"object",required:["type"],properties:{type:{type:"string",title:"Name"},condition:{type:"string",title:"Condition",default:"",enum:["","Excellent","Good","Acceptable","Poor"]},image:{type:"string",title:"image",default:"Image URL"},description:{type:"string",title:"Description"},other:{type:"array",title:"Other",items:{type:"object",properties:{item:{type:"string",title:"Item"},details:{type:"string",title:"Details"}}}}}}}},uiSchema:{description:{"ui:widget":"textarea"}},formData:{}}}},Garage:{feats:{floor:{schema:{type:"object",properties:{stove:{title:"Floor",type:"object",required:["type"],properties:{type:{type:"string",title:"Name"},condition:{type:"string",title:"Condition",default:"",enum:["","Excellent","Good","Acceptable","Poor"]},image:{type:"string",title:"image",default:"Image URL"},description:{type:"string",title:"Description"},other:{type:"array",title:"Other",items:{type:"object",properties:{item:{type:"string",title:"Item"},details:{type:"string",title:"Details"}}}}}}}},uiSchema:{description:{"ui:widget":"textarea"},details:{"ui:widget":"textarea"}},formData:{}},roof:{schema:{type:"object",properties:{counters:{title:"Roof",type:"object",required:["type"],properties:{type:{type:"string",title:"Name"},condition:{type:"string",title:"Condition",default:"",enum:["","Excellent","Good","Acceptable","Poor"]},image:{type:"string",title:"image",default:"Image URL"},description:{type:"string",title:"Description"},other:{type:"array",title:"Other",items:{type:"object",properties:{item:{type:"string",title:"Item"},details:{type:"string",title:"Details"}}}}}}}},uiSchema:{description:{"ui:widget":"textarea"}},formData:{}}}}    }};
 var reportState = {};
 var database = {};
 
@@ -12,6 +13,9 @@ var setStorageJSON = function(key, val){
 var getStorageJSON = function(key){
 	return JSON.parse(localStorage.getItem(key));
 };
+var getReportSelectData = function(){
+	return formJSON;
+}
 //Test Report State Data (updated as user updates information)
 var init = function(){
 	if(!localStorage.getItem('reportState')){
@@ -32,33 +36,34 @@ var initState = function(){
 	reportState = {
 		header:{},
 		zones:{},
-		selects:{
-		    zone: "",
-		    feat: ""
-		}
+		selects:{zone: "",feat: ""}
     };
 };
 
 var setDatabase = function(){
-	setStorageJSON('database',getStorageJSON('reportState'));
+	setStorageJSON('database',getReportStateData());
 };
 
 var setReportStateData = function(reportState){
 	setStorageJSON('reportState',reportState);
 };
+
+var getReportStateData = function(){
+	return getStorageJSON('reportState');
+}
 //TODO: Bug where previous zone features getting overwritten
 var updateReportState = function(zoneName, featName, data){
     if(typeof reportState.zones[zoneName] !== 'undefined'){
-	reportState.zones[zoneName].feats[featName] = data;
+		reportState.zones[zoneName].feats[featName] = data;
     } else {
-	console.log('zone does not exist');
-	reportState.zones[zoneName] = {};
-	reportState.zones[zoneName].feats = {};
-	reportState.zones[zoneName].feats[featName] = data;
+		console.log('zone does not exist');
+		reportState.zones[zoneName] = {};
+		reportState.zones[zoneName].feats = {};
+		reportState.zones[zoneName].feats[featName] = data;
     }
-    console.log(reportState);
     resetReportStateSelects();
-    //renderReport();
+	setReportStateData(reportState);
+    renderReport();
 };
 
 var updateReportStateZone = function(zoneName, data){
@@ -71,97 +76,100 @@ var updateReportStateZone = function(zoneName, data){
     }
     console.log(reportState);
     resetReportStateSelects();
+    renderReport();
 };
 var removeReportStateFeat = function(zoneName, featName){
     if(typeof reportState.zones[zoneName] !== 'undefined'){
 		if(typeof reportState.zones[zoneName].feats[featName] !== 'undefined'){
 			delete reportState.zones[zoneName].feats[featName];
+			//reportState.zones[zoneName].feats = reportState.zones[zoneName].feats || {};
 			//TODO: Bug - cannot detect size of zone to see if zone should be deleted
 			//removeReportStateZone(zoneName);
+		    renderReport();
 		}
     }
-}
+};
 var removeReportStateZone = function(zoneName){
     if(typeof reportState.zones[zoneName] !== 'undefined'){
 		delete reportState.zones[zoneName];
+		renderReport();
 	}
-}
+};
 var updateReportSelectZone = function(zoneName){
     setReportStateSelectZone(zoneName);
     setReportStateData(reportState);
-}
+    renderReport();
+};
 var updateReportSelectFeat = function(featName){
     setReportStateSelectFeat(featName);
     var featData = getFeature(reportState.selects.zone,reportState.selects.feat);
-    setReportStateData(reportState);
     updateReportState(reportState.selects.zone,reportState.selects.feat,featData);
-}
+};
 var resetReportStateSelects = function(){
     setReportStateSelectZone("");
     setReportStateSelectFeat("");
-}
+};
 var getReportStateSelectZone = function(){
     return reportState.selects.zone;
-}
+};
 var setReportStateSelectZone = function(zone){
     reportState.selects.zone = zone;
-}
+};
 var getReportStateSelectFeat = function(){
     return reportState.selects.feat;
-}
+};
 var setReportStateSelectFeat = function(feat){
     reportState.selects.feat = feat;
-}
-//Test Report Skeleton Data
-var formJSON = {header:{schema:{type:"object",properties:{address:{type:"string",title:"Address"},propetyType:{type:"string",title:"Property Type"},subType:{type:"string",title:"Sub Type"}}},uiSchema:{description:{"ui:widget":"textarea"}},formData:{}},zones:{Kitchen:{feats:{stove:{schema:{type:"object",properties:{stove:{title:"Stove",type:"object",required:["type"],properties:{type:{type:"string",title:"Name"},condition:{type:"string",title:"Condition",default:"",enum:["","Excellent","Good","Acceptable","Poor"]},image:{type:"string",title:"image",default:"Image URL"},description:{type:"string",title:"Description"},other:{type:"array",title:"Other",items:{type:"object",properties:{item:{type:"string",title:"Item"},details:{type:"string",title:"Details"}}}}}}}},uiSchema:{description:{"ui:widget":"textarea"},details:{"ui:widget":"textarea"}},formData:{}},counters:{schema:{type:"object",properties:{counters:{title:"Counter",type:"object",required:["type"],properties:{type:{type:"string",title:"Name"},condition:{type:"string",title:"Condition",default:"",enum:["","Excellent","Good","Acceptable","Poor"]},image:{type:"string",title:"image",default:"Image URL"},description:{type:"string",title:"Description"},other:{type:"array",title:"Other",items:{type:"object",properties:{item:{type:"string",title:"Item"},details:{type:"string",title:"Details"}}}}}}}},uiSchema:{description:{"ui:widget":"textarea"}},formData:{}}}},Garage:{feats:{floor:{schema:{type:"object",properties:{stove:{title:"Floor",type:"object",required:["type"],properties:{type:{type:"string",title:"Name"},condition:{type:"string",title:"Condition",default:"",enum:["","Excellent","Good","Acceptable","Poor"]},image:{type:"string",title:"image",default:"Image URL"},description:{type:"string",title:"Description"},other:{type:"array",title:"Other",items:{type:"object",properties:{item:{type:"string",title:"Item"},details:{type:"string",title:"Details"}}}}}}}},uiSchema:{description:{"ui:widget":"textarea"},details:{"ui:widget":"textarea"}},formData:{}},roof:{schema:{type:"object",properties:{counters:{title:"Roof",type:"object",required:["type"],properties:{type:{type:"string",title:"Name"},condition:{type:"string",title:"Condition",default:"",enum:["","Excellent","Good","Acceptable","Poor"]},image:{type:"string",title:"image",default:"Image URL"},description:{type:"string",title:"Description"},other:{type:"array",title:"Other",items:{type:"object",properties:{item:{type:"string",title:"Item"},details:{type:"string",title:"Details"}}}}}}}},uiSchema:{description:{"ui:widget":"textarea"}},formData:{}}}}    }};
-
-var getReportData = function (){
-    //TODO: get Report data from REST Service based on input
-    //return sample form data
-    return formJSON;
 };
 
 var getZone = function(zoneName){
-    return getReportData().zones[zoneName];
+    return getReportSelectData().zones[zoneName];
 };
 
 var getFeature = function(zoneName,featName){
-    return getReportData().zones[zoneName].feats[featName];
+    return getReportSelectData().zones[zoneName].feats[featName];
 };
 
 var newFeat = function(zoneName, featName){
     featData = getFeature(zoneName, featName);
     updateReportState(zoneName, featName, featData);
 };
-var deleteFeature = function(featId) {
-    document.getElementById(featId).remove();
-};
 
 var log = function(type){
     console.log.bind(console, type);
 };
 
-var DeleteFeat = React.createClass({
+var FormWrapper = React.createClass({
 	handleDeleteFeat: function(e){
 		e.preventDefault();
-		removeReportStateFeat(this.props.zoneName,this.props.data);
+		removeReportStateFeat(this.props.zoneName,this.props.featName);
+	},
+	handleChange: function({formData}){
+		//e.preventDefault();
+		//console.log(formData);
+		//updateReportState(this.props.zoneName,this.props.featName,formData);
+	},
+	handleSubmit: function({formData}){
+		//e.preventDefault();
+		console.log(formData);
+		updateReportState(this.props.zoneName,this.props.featName,formData);
 	},
 	render: function(){
-		return (<a href="#" onClick={this.handleDeleteFeat}>Delete Feat</a>);
+		return(
+			<div>
+			<Form schema={this.props.schema}
+					uiSchema={this.props.uiSchema}
+					formData={this.props.formData}
+					onChange={this.handleChange}
+					onSubmit={this.handleSubmit}
+					noValidate={true}/>
+			<a href="#" onClick={this.handleDeleteFeat}>Delete Feat</a>
+			</div>
+		);
 	}
 });
 
 var Feat = React.createClass({
-	setInitialState: function (){
-		//{}
-	},
-	handleChange:function(){
-		console.log('FORM CHANGE');
-		//updateReportStateZone(zoneName,formData);
-	},
-	handleSubmit: function(e){
-		e.preventDefault();
-	},
 	render: function(){
 		var feats = this.props.data;
 		var zoneName = this.props.zoneName;
@@ -169,15 +177,12 @@ var Feat = React.createClass({
 		    <div className="report-body-zone-feat">
 			{Object.keys(feats).map(function (key){
 			    return(
-				<div>
-				    <Form schema={feats[key].schema}
-					uiSchema={feats[key].uiSchema}
-					formData={feats[key].formData}
-					onChange={console.log('changed')}
-					onSubmit={this.handleSubmit}
-					liveValidate={true}/>
-					<DeleteFeat data={key} zoneName={zoneName}/>
-				</div>);
+				    <FormWrapper schema={feats[key].schema}
+								uiSchema={feats[key].uiSchema}
+								formData={feats[key].formData}
+								zoneName={zoneName}
+								featName={key}/>
+				);
 			})}
 		    </div>
 		);
@@ -261,7 +266,8 @@ var Zone = React.createClass({
 
 var ReportBody = React.createClass({
     render: function(){
-	var selectableZones = this.props.data;
+	var selectableZones = this.props.selectData;
+	var reportState = this.props.data;
 	return (
 	    <div className="report-containers">
 		<div id="report-zones-container">
@@ -275,73 +281,58 @@ var ReportBody = React.createClass({
 });
 
 var ReportHeader = React.createClass({
-    render: function(){
-	var header = this.props.data;
-	return (
-	    <div className="report-header-container">
-		<Form schema={header.schema}
-		    uiSchema={header.uiSchema}
-		    formData={header.formData}/>
-	    </div>
-	);
+	handleSubmit: function({formData}){
+		//e.preventDefault();
+	},
+	render: function(){
+		var header = this.props.data;
+		return (
+		    <div className="report-header-container">
+			<Form schema={header.schema}
+			    uiSchema={header.uiSchema}
+			    formData={header.formData}
+				onSubmit={this.handleSubmit}
+				noValidate={true}/>
+		    </div>
+		);
     }
 });
 
 var ReportSubmit = React.createClass({
 	save: function(){
+		for (var i=0;i<document.forms.length;i++){
+			//document.forms[i].submit();
+			console.log(document.forms[i]);
+		}
 		setDatabase();
 	},
 	render: function(){
-		return(<button type="button" value="Save Report" onClick={this.save}></button>);
+		return(<button className="show" type="button" value="Save Report" onClick={this.save}>Save Report</button>);
 	}
 });
 
 var Report = React.createClass({
-	setInitialState: function(){
-		return: getReportData();
-	},
-	updateData:function(zoneName,featName,data){
-		updateReportState(zoneName,featName,data);
-		this.setState(reportState);
-	},
-	updateZoneData:function(zoneName,data){
-		updateReportStateZone(zoneName,data);
-		this.setState(reportState);
-	},
-	updateSelectZone:function(zoneName){
-		updateReportSelectZone(zoneName);
-		this.setState(reportState);
-	},
-	updateSelectFeat:function(featName){
-		updateReportSelectFeat(featName);
-		this.setState(reportState);
-	},
-	removeReportZone:function(zoneName){
-		removeReportStateZone(zoneName);
-		this.setState(reportState);
-	},
-	removeReportFeat:function(zoneName,featName){
-		removeReportFeat(zoneName,featName);
-		this.setState(reportState);
-	},
 	render: function(){
 		//display report header and footer classes
 		return (
 		    <div className="report-container">
-				<ReportHeader data={this.state.header}/>
-				<ReportBody data={this.state.zones}/>
+				<ReportHeader data={this.props.reportSelectData.header}/>
+				<ReportBody selectData={this.props.reportSelectData.zones}
+							data={this.props.reportData}/>
 				<ReportSubmit/>
 		    </div>
 		);
     }
 });
 
+var renderReport = function(){
+	ReactDOM.render(<Report reportSelectData={getReportSelectData()}
+							reportData={getReportStateData()}
+					/>, document.getElementById('forms'));
+}
 if (typeof(Storage) !== "undefined"){
     init();
-	setStorageJSON('reportState',reportState);
-	ReactDOM.render(<Report />, document.getElementById('forms'));
+	renderReport();
 } else {
    ReactDOM.render(<h2>Your Browser does not support Local Storage</h2>, document.getElementById('forms'));
 }
-
-module.exports = Report;
