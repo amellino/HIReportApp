@@ -2,7 +2,12 @@ var React = require('react');
 var ReactDOM = require('react-dom');
 var Form = require('react-jsonschema-form');
 //var bootstrap = require('bootstrap');
-
+/*TODO:
+	- Adding Sections should remove item from drop down?
+	- Form data needs to save appropriately
+	- Custom Sections
+	- Clean up and mke code modular
+*/
 var formJSON = {header:{schema:{type:"object",properties:{address:{type:"string",title:"Address"},propetyType:{type:"string",title:"Property Type"},subType:{type:"string",title:"Sub Type"}}},uiSchema:{description:{"ui:widget":"textarea"}},formData:{}},zones:{Kitchen:{feats:{stove:{schema:{type:"object",properties:{stove:{title:"Stove",type:"object",required:["type"],properties:{type:{type:"string",title:"Name"},condition:{type:"string",title:"Condition",default:"",enum:["","Excellent","Good","Acceptable","Poor"]},image:{type:"string",title:"image",default:"Image URL"},description:{type:"string",title:"Description"},other:{type:"array",title:"Other",items:{type:"object",properties:{item:{type:"string",title:"Item"},details:{type:"string",title:"Details"}}}}}}}},uiSchema:{description:{"ui:widget":"textarea"},details:{"ui:widget":"textarea"}},formData:{}},counters:{schema:{type:"object",properties:{counters:{title:"Counter",type:"object",required:["type"],properties:{type:{type:"string",title:"Name"},condition:{type:"string",title:"Condition",default:"",enum:["","Excellent","Good","Acceptable","Poor"]},image:{type:"string",title:"image",default:"Image URL"},description:{type:"string",title:"Description"},other:{type:"array",title:"Other",items:{type:"object",properties:{item:{type:"string",title:"Item"},details:{type:"string",title:"Details"}}}}}}}},uiSchema:{description:{"ui:widget":"textarea"}},formData:{}}}},Garage:{feats:{floor:{schema:{type:"object",properties:{stove:{title:"Floor",type:"object",required:["type"],properties:{type:{type:"string",title:"Name"},condition:{type:"string",title:"Condition",default:"",enum:["","Excellent","Good","Acceptable","Poor"]},image:{type:"string",title:"image",default:"Image URL"},description:{type:"string",title:"Description"},other:{type:"array",title:"Other",items:{type:"object",properties:{item:{type:"string",title:"Item"},details:{type:"string",title:"Details"}}}}}}}},uiSchema:{description:{"ui:widget":"textarea"},details:{"ui:widget":"textarea"}},formData:{}},roof:{schema:{type:"object",properties:{counters:{title:"Roof",type:"object",required:["type"],properties:{type:{type:"string",title:"Name"},condition:{type:"string",title:"Condition",default:"",enum:["","Excellent","Good","Acceptable","Poor"]},image:{type:"string",title:"image",default:"Image URL"},description:{type:"string",title:"Description"},other:{type:"array",title:"Other",items:{type:"object",properties:{item:{type:"string",title:"Item"},details:{type:"string",title:"Details"}}}}}}}},uiSchema:{description:{"ui:widget":"textarea"}},formData:{}}}}    }};
 var reportState = {};
 var database = {};
@@ -56,27 +61,37 @@ var updateReportState = function(zoneName, featName, data){
     if(typeof reportState.zones[zoneName] !== 'undefined'){
 		reportState.zones[zoneName].feats[featName] = data;
     } else {
-		console.log('zone does not exist');
 		reportState.zones[zoneName] = {};
 		reportState.zones[zoneName].feats = {};
 		reportState.zones[zoneName].feats[featName] = data;
     }
     resetReportStateSelects();
-		setReportStateData(reportState);
+	setReportStateData(reportState);
+    renderReport();
+};
+
+var updateReportStateFormData = function(zoneName, featName, formData){
+    if(typeof reportState.zones[zoneName] !== 'undefined'){
+		reportState.zones[zoneName].feats[featName].formData = formData;
+    } else {
+		reportState.zones[zoneName] = {};
+		reportState.zones[zoneName].feats = {};
+		reportState.zones[zoneName].feats[featName].formData = formData;
+    }
+    resetReportStateSelects();
+	setReportStateData(reportState);
     renderReport();
 };
 
 var updateReportStateZone = function(zoneName, data){
     if(typeof reportState.zones[zoneName] !== 'undefined'){
-	reportState.zones[zoneName].feats = data;
+		reportState.zones[zoneName].feats = data;
     } else {
-	console.log('zone does not exist');
-	reportState.zones[zoneName] = {};
-	reportState.zones[zoneName].feats = data;
+		reportState.zones[zoneName] = {};
+		reportState.zones[zoneName].feats = data;
     }
-    console.log(reportState);
     resetReportStateSelects();
-		setReportStateData(reportState);
+	setReportStateData(reportState);
     renderReport();
 };
 var removeReportStateFeat = function(zoneName, featName){
@@ -149,8 +164,8 @@ var FormWrapper = React.createClass({
 	},
 	handleChange: function({formData}){
 		//e.preventDefault();
-		//console.log(formData);
-		//updateReportState(this.props.zoneName,this.props.featName,formData);
+		console.log(formData);
+		updateReportStateFormData(this.props.zoneName,this.props.featName,formData);
 	},
 	handleSubmit: function({formData}){
 		//e.preventDefault();
