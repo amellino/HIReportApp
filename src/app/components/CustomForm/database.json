@@ -1,0 +1,34 @@
+{
+	client: {
+		firstName: "Kyle",
+		settings: {
+			navMenuLocation: "left"
+		}
+	},
+	reports: {
+		reportKey0: {
+			header:{
+				address: "0101 Data Dr. Application, OH 00010",
+				type: "Home Type",
+				subType: "Home Sub Tye"
+			},
+			zones:{
+				zone0:{
+					title: "",
+					feats:{
+						feat0:{
+							title: "",
+							attrs:{
+								attr0: {
+									title: "",
+									displayName: "",
+									value: ""
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}

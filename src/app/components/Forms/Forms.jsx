@@ -3,12 +3,15 @@ var ReactDOM = require('react-dom');
 var Form = require('react-jsonschema-form');
 //var bootstrap = require('bootstrap');
 /*TODO:
+	- add image / video support
 	- Adding Sections should remove item from drop down?
-	- Form data needs to save appropriately
 	- Custom Sections
-	- Clean up and mke code modular
+	- Clean up and make code modular
 */
-var formJSON = {header:{schema:{type:"object",properties:{address:{type:"string",title:"Address"},propetyType:{type:"string",title:"Property Type"},subType:{type:"string",title:"Sub Type"}}},uiSchema:{description:{"ui:widget":"textarea"}},formData:{}},zones:{Kitchen:{feats:{stove:{schema:{type:"object",properties:{stove:{title:"Stove",type:"object",required:["type"],properties:{type:{type:"string",title:"Name"},condition:{type:"string",title:"Condition",default:"",enum:["","Excellent","Good","Acceptable","Poor"]},image:{type:"string",title:"image",default:"Image URL"},description:{type:"string",title:"Description"},other:{type:"array",title:"Other",items:{type:"object",properties:{item:{type:"string",title:"Item"},details:{type:"string",title:"Details"}}}}}}}},uiSchema:{description:{"ui:widget":"textarea"},details:{"ui:widget":"textarea"}},formData:{}},counters:{schema:{type:"object",properties:{counters:{title:"Counter",type:"object",required:["type"],properties:{type:{type:"string",title:"Name"},condition:{type:"string",title:"Condition",default:"",enum:["","Excellent","Good","Acceptable","Poor"]},image:{type:"string",title:"image",default:"Image URL"},description:{type:"string",title:"Description"},other:{type:"array",title:"Other",items:{type:"object",properties:{item:{type:"string",title:"Item"},details:{type:"string",title:"Details"}}}}}}}},uiSchema:{description:{"ui:widget":"textarea"}},formData:{}}}},Garage:{feats:{floor:{schema:{type:"object",properties:{stove:{title:"Floor",type:"object",required:["type"],properties:{type:{type:"string",title:"Name"},condition:{type:"string",title:"Condition",default:"",enum:["","Excellent","Good","Acceptable","Poor"]},image:{type:"string",title:"image",default:"Image URL"},description:{type:"string",title:"Description"},other:{type:"array",title:"Other",items:{type:"object",properties:{item:{type:"string",title:"Item"},details:{type:"string",title:"Details"}}}}}}}},uiSchema:{description:{"ui:widget":"textarea"},details:{"ui:widget":"textarea"}},formData:{}},roof:{schema:{type:"object",properties:{counters:{title:"Roof",type:"object",required:["type"],properties:{type:{type:"string",title:"Name"},condition:{type:"string",title:"Condition",default:"",enum:["","Excellent","Good","Acceptable","Poor"]},image:{type:"string",title:"image",default:"Image URL"},description:{type:"string",title:"Description"},other:{type:"array",title:"Other",items:{type:"object",properties:{item:{type:"string",title:"Item"},details:{type:"string",title:"Details"}}}}}}}},uiSchema:{description:{"ui:widget":"textarea"}},formData:{}}}}    }};
+const REPORT_STATE = 'reportState';
+const REPORT_BACKUP = 'reportBackup';
+const REPORT_DATABASE = 'reportDatabase';
+var formJSON = {header:{schema:{type:"object",properties:{address:{type:"string",title:"Address"},propetyType:{type:"string",title:"Property Type"},subType:{type:"string",title:"Sub Type"}}},uiSchema:{description:{"ui:widget":"textarea"}},formData:{}},zones:{Kitchen:{feats:{stove:{schema:{type:"object",properties:{stove:{title:"Stove",type:"object",required:["type"],properties:{type:{type:"string",title:"Name"},condition:{type:"string",title:"Condition",default:"",enum:["","Excellent","Good","Acceptable","Poor"]},image:{type:"string",title:"image",format:"data-url",accept:"image/*;capture=camera"},description:{type:"string",title:"Description"},other:{type:"array",title:"Other",items:{type:"object",properties:{item:{type:"string",title:"Item"},details:{type:"string",title:"Details"}}}}}}}},uiSchema:{description:{"ui:widget":"textarea"},details:{"ui:widget":"textarea"}},formData:{}},counters:{schema:{type:"object",properties:{counters:{title:"Counter",type:"object",required:["type"],properties:{type:{type:"string",title:"Name"},condition:{type:"string",title:"Condition",default:"",enum:["","Excellent","Good","Acceptable","Poor"]},image:{type:"string",title:"image",format:"data-url",accept:"image/*;capture=camera"},description:{type:"string",title:"Description"},other:{type:"array",title:"Other",items:{type:"object",properties:{item:{type:"string",title:"Item"},details:{type:"string",title:"Details"}}}}}}}},uiSchema:{description:{"ui:widget":"textarea"}},formData:{}}}},Garage:{feats:{floor:{schema:{type:"object",properties:{stove:{title:"Floor",type:"object",required:["type"],properties:{type:{type:"string",title:"Name"},condition:{type:"string",title:"Condition",default:"",enum:["","Excellent","Good","Acceptable","Poor"]},image:{type:"string",title:"image",format:"data-url",accept:"image/*;capture=camera"},description:{type:"string",title:"Description"},other:{type:"array",title:"Other",items:{type:"object",properties:{item:{type:"string",title:"Item"},details:{type:"string",title:"Details"}}}}}}}},uiSchema:{description:{"ui:widget":"textarea"},details:{"ui:widget":"textarea"}},formData:{}},roof:{schema:{type:"object",properties:{counters:{title:"Roof",type:"object",required:["type"],properties:{type:{type:"string",title:"Name"},condition:{type:"string",title:"Condition",default:"",enum:["","Excellent","Good","Acceptable","Poor"]},image:{type:"string",title:"image",format:"data-url",accept:"image/*;capture=camera"},description:{type:"string",title:"Description"},other:{type:"array",title:"Other",items:{type:"object",properties:{item:{type:"string",title:"Item"},details:{type:"string",title:"Details"}}}}}}}},uiSchema:{description:{"ui:widget":"textarea"}},formData:{}}}}    }};
 var reportState = {};
 var database = {};
 
@@ -23,17 +26,17 @@ var getReportSelectData = function(){
 }
 //Test Report State Data (updated as user updates information)
 var init = function(){
-	if(!localStorage.getItem('reportState')){
+	if(!localStorage.getItem(REPORT_STATE)){
 		initState();
-		setStorageJSON('reportState',reportState);
+		setStorageJSON(REPORT_STATE,reportState);
 	} else {
-		reportState = getStorageJSON('reportState');
+		reportState = getStorageJSON(REPORT_STATE);
 	}
 
-	if(!localStorage.getItem('database')){
-		setStorageJSON('database',database);
+	if(!localStorage.getItem(REPORT_DATABASE)){
+		setStorageJSON(REPORT_DATABASE,database);
 	} else {
-		database = getStorageJSON('database');
+		database = getStorageJSON(REPORT_DATABASE);
 	}
 };
 
@@ -45,17 +48,37 @@ var initState = function(){
     };
 };
 
+var clearReport = function(){
+	deleteReportState();
+}
+
+var deleteReportState = function(){
+	backupReport();
+	localStorage.removeItem(REPORT_STATE);
+}
+
+var backupReport = function(){
+	setStorageJSON(REPORT_BACKUP,getReportStateData());
+};
+
 var setDatabase = function(){
-	setStorageJSON('database',getReportStateData());
+	setStorageJSON(REPORT_DATABASE,getReportStateData());
 };
 
 var setReportStateData = function(reportState){
-	setStorageJSON('reportState',reportState);
+	setStorageJSON(REPORT_STATE,reportState);
 };
 
 var getReportStateData = function(){
-	return getStorageJSON('reportState');
+	return getStorageJSON(REPORT_STATE);
 }
+
+var saveFormHeader = function(data){
+	reportState.header = data;
+	setReportStateData(reportState);
+    renderReport();
+};
+
 //TODO: Bug where previous zone features getting overwritten
 var updateReportState = function(zoneName, featName, data){
     if(typeof reportState.zones[zoneName] !== 'undefined'){
@@ -98,10 +121,10 @@ var removeReportStateFeat = function(zoneName, featName){
     if(typeof reportState.zones[zoneName] !== 'undefined'){
 		if(typeof reportState.zones[zoneName].feats[featName] !== 'undefined'){
 			delete reportState.zones[zoneName].feats[featName];
-			//reportState.zones[zoneName].feats = reportState.zones[zoneName].feats || {};
-			//TODO: Bug - cannot detect size of zone to see if zone should be deleted
-			//removeReportStateZone(zoneName);
-				setReportStateData(reportState);
+			if(Object.keys(reportState.zones[zoneName].feats).length == 0){
+				removeReportStateZone(zoneName)
+			}
+			setReportStateData(reportState);
 		    renderReport();
 		}
     }
@@ -156,6 +179,24 @@ var newFeat = function(zoneName, featName){
 var log = function(type){
     console.log.bind(console, type);
 };
+
+var CustomSelectProp = React.createClass ({
+	handleSubmit(){
+		//TODO: add the name, type combo to the Zone Feature
+	},
+	//TODO: Form JSON for text and Select
+	// - Name and Type
+	render: function(){
+		return 	(<div><FormWrapper/></div>);
+	}
+});
+
+var CustomProps = React.createClass({
+	//TODO: Display existing Select Prop
+	render: function(){
+		return 	(<div><CustomSelectProp/></div>);
+	}
+});
 
 var FormWrapper = React.createClass({
 	handleDeleteFeat: function(e){
@@ -273,6 +314,7 @@ var Zone = React.createClass({
 	zoneName = this.props.dataName;
 	return(
 	    <div className="report-body-zone">
+		<h3>{zoneName}</h3>
 		{Object.keys(feats).map(function (key){
 		    return(<Feat data={feats[key]} dataName={key} zoneName={zoneName}/>);
 		})}
@@ -299,17 +341,18 @@ var ReportBody = React.createClass({
 });
 
 var ReportHeader = React.createClass({
-	handleSubmit: function({formData}){
-		//e.preventDefault();
+	handleChange: function({formData}){
+		saveFormHeader(formData);
 	},
 	render: function(){
-		var header = this.props.data;
+		var header = this.props.selectData;
+		var headerData = this.props.data;
 		return (
 		    <div className="report-header-container">
 			<Form schema={header.schema}
 			    uiSchema={header.uiSchema}
-			    formData={header.formData}
-				onSubmit={this.handleSubmit}
+			    formData={headerData}
+				onChange={this.handleChange}
 				noValidate={true}/>
 		    </div>
 		);
@@ -334,7 +377,8 @@ var Report = React.createClass({
 		//display report header and footer classes
 		return (
 		    <div className="report-container">
-				<ReportHeader data={this.props.reportSelectData.header}/>
+				<ReportHeader selectData={this.props.reportSelectData.header}
+								data={this.props.reportData.header}/>
 				<ReportBody selectData={this.props.reportSelectData.zones}
 							data={this.props.reportData}/>
 				<ReportSubmit/>
