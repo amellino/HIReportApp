@@ -12,11 +12,13 @@
 				type: "Home Type",
 				subType: "Home Sub Tye"
 			},
-			zones:{
-				zone0:{
+			zones:[
+				{
+					name: ""
 					title: "",
-					feats:{
-						feat0:{
+					feats:[
+						{
+							name: "",
 							title: "",
 							attrs:{
 								attr0: {
@@ -26,9 +28,9 @@
 								}
 							}
 						}
-					}
+					]
 				}
-			}
+			]
 		}
 	}
 }

@@ -4,12 +4,15 @@ var reportUtils = require('./reportUtils.js');
 var globalUtils = require('./globalUtils.js');
 
 var formUtils = {
-	templateZone: function(id, title){
-		var json = {id: id, title: title, feats: {}};
+	templateZone: function(id, name, title){
+		var json = {id: id, name: name, title: title, feats: []};
 		return json;
 	},
-	templateFeature: function(title) {
+	templateFeature: function(id, name, title) {
 		var json = {
+			id: id,
+			name: name,
+			title: title,
 		    schema: {
 				type: "object",
 				properties: {}
@@ -39,51 +42,77 @@ var formUtils = {
 		var json = {"ui:widget": widgetType};
 		return json;
 	},
+	templateNewReportSchema: function(){
+		return {type:"object",properties:{title:{type:"string",title:"Report Title"},address:{type:"string",title:"Address"},propetyType:{type:"string",title:"Property Type"},subType:{type:"string",title:"Sub Type"}}};
+	},
+	templateNewReportUISchema: function(){
+		return {};
+	},
+	templateNewZoneSchema: function(){
+		return {type:"object",properties:{title:{type:"string",title:"Report Title"}}};
+	},
+	templateNewZoneUISchema: function(){
+		return {};
+	},
 	createProp: function(id, type, title, defaultValue, values){
 		var json = {};
-		json[id] = templateProp(type, title, defaultValue, values);
+		json[id] = this.templateProp(type, title, defaultValue, values);
 		return json;
 	},
-	createFeature: function(id, title){
-		var json = {};
-		json[id] = templateFeature(title);
-		return json;
+	createFeature: function(id, name, title){
+		return this.templateFeature(id, name, title);
 	},
-	createZone: function(id, zoneId, tile) {
-		var json = {};
-		json[id] = templateZone(zoneId, title);
-		return json;
+	createZone: function(id, name, title) {
+		return this.templateZone(id, name, title);
 	},
 	createReport: function(data) {
-		var json = {header:{},zones:{}};
+		var json = {header:{},zones:[]};
 		Object.keys(data).map(function(key){
 			json.header[key] = data[key];
 		})
 		return json;
 	},
 	addPropToFeature: function(feature, id, uiProp, data){
-		feat = feature.keys()[0];
-		feat.schema.properties[prop.keys()[0]] = prop[prop.keys()[0]];
-		feat.uiSchema[uiProp.keys()[0]] = uiProp[uiProp.keys()[0]];
-		feat.formData[data.keys()[0]] = data[data.keys()[0]];
+		feature.schema.properties[prop.keys()[0]] = prop[prop.keys()[0]];
+		feature.uiSchema[uiProp.keys()[0]] = uiProp[uiProp.keys()[0]];
+		feature.formData[data.keys()[0]] = data[data.keys()[0]];
 	},
-	addFeatureToZone: function(zone, feature){
-		zone.keys()[0].feats[feature.keys()[0]] = feature[feature.keys()[0]];
+	addFeatureToZone: function(zone, feature, index){
+		zone.feats.splice(index, 0, feature);
 	},
 	getNewReportSchema: function(){
-		/*TODO: get this using helpers*/
-		return {type:"object",properties:{title:{type:"string",title:"Report Title"},address:{type:"string",title:"Address"},propetyType:{type:"string",title:"Property Type"},subType:{type:"string",title:"Sub Type"}}};
+		return this.templateNewReportSchema();
 	},
 	getNewReportUISchema: function(){
-		/*TODO: get this using helpers*/
-		return {};
+		return this.templateNewReportUISchema();
+	},
+	getNewZoneSchema: function(){
+		return this.templateNewZoneSchema();
+	},
+	getNewZoneUISchema: function(){
+		return this.templateNewZoneUISchema();
 	},
 	createNewReport: function(data){
-		var db = utils.dataUtils.getReportDatabase();
+		var db = dataUtils.getReportDatabase();
 		db.reports[data.title] = this.createReport(data);
-		utils.dataUtils.setActiveReport(data.title);
-		utils.dataUtils.setReportDatabae(db);
-		renderApp();
+		dataUtils.setActiveReport(data.title);
+		dataUtils.setReportDatabase(db);
+	},
+	createNewZone: function(index, id, name, title){
+		var ar = dataUtils.getActiveReport();
+		var zone = this.createZone(id, name, title);
+		ar.zones.splice(index+1, 0, zone);
+		dataUtils.pushReportData(ar);
+	},
+	createNewFeat: function(zoneName, index, id, name, title){
+		var ar = dataUtils.getActiveReport();
+		var feature = this.createFeature(id, name, title);
+		for(var i=0; i<ar.zones.length; i++){
+			if(ar.zones[i].name === zoneName){
+				ar.zones[i].feats.splice(index+1, 0, feature);
+			}
+		}
+		dataUtils.pushReportData(ar);
 	}
 };
 

@@ -1,6 +1,6 @@
 var React = require('react');
 var ReactDOM = require('react-dom');
-var Form = require('react-jsonschema-form');
+var ReactJSONForm = require('react-jsonschema-form');
 var utils = require('../../utils/utils.js');
 
 var ReportProp = React.createClass({
@@ -22,7 +22,7 @@ var ReportProp = React.createClass({
 	render: function(){
 		return(
 			<div className="hide-submit">
-			<Form schema={this.props.schema}
+			<ReactJSONForm schema={this.props.schema}
 					uiSchema={this.props.uiSchema}
 					formData={this.props.formData}
 					onChange={this.handleChange}
@@ -53,7 +53,7 @@ var FormWrapper = React.createClass({
 	render: function(){
 		return(
 			<div className="form-wrapper">
-			<Form schema={this.props.schema}
+			<ReactJSONForm schema={this.props.schema}
 					uiSchema={this.props.uiSchema}
 					formData={this.props.formData}
 					onChange={this.handleChange}
@@ -68,6 +68,7 @@ var ReportFeat = React.createClass({
 		var feat = this.props.feat;
 		return (
 			<div className="report-feat">
+				<h5>{feat.name}</h5>
 				<ReportProp
 					schema={feat.schema}
 					uiSchema={feat.uiSchema}
@@ -77,8 +78,41 @@ var ReportFeat = React.createClass({
 	}
 });
 var NewReportFeatButton = React.createClass({
+	getInitialState: function() {
+        return { showForm: false };
+    },
+    showForm: function(e) {
+		e.preventDefault();
+        this.setState({ showForm: true });
+    },
+	handleCancel: function(e){
+		e.preventDefault();
+		this.setState({ showForm: false });
+	},
+	handleSubmit: function({formData}){
+		utils.formUtils.createNewFeat(this.props.zoneName, this.props.index, formData.title, formData.title, formData.title);
+		this.setState({ showForm: false });
+		this.props.pushUpdate();
+	},
 	render: function(){
-		return (<button type="button">New Feature</button>);
+		return(
+			<div className="new-report">
+				{ !this.state.showForm ?
+					(<button type="button" onClick={this.showForm}>Create New Feat</button>)
+					:null
+				}
+				{ this.state.showForm ?
+					(<div className="new-report-form">
+						<ReactJSONForm schema={utils.formUtils.getNewZoneSchema()}
+							uiSchema={utils.formUtils.getNewZoneUISchema()}
+							onSubmit={this.handleSubmit}
+							noValidate={true}/>
+						<a href="#" onClick={this.handleCancel}>Cancel</a>
+					</div>)
+					: null
+				}
+			</div>
+		);
 	}
 });
 var NewReportFeat = React.createClass({
@@ -89,20 +123,30 @@ var NewReportFeat = React.createClass({
 });
 var ReportZone = React.createClass({
 	render: function(){
+		var _this = this;
 		var feats = this.props.zone.feats;
-		if(feats === undefined || feats === null || Object.keys(feats).length > 0){
-			return(<NewReportFeatButton/>);
+		if(feats === undefined || feats === null || Object.keys(feats).length == 0){
+			return(<div><h5>{this.props.zone.name}</h5>
+					<NewReportFeatButton index={0}
+						pushUpdate={_this.props.pushUpdate}
+						zoneName={_this.props.zone.name}/>
+					</div>);
 		} else {
 			return(
 				<div className="report-zone">
-					{Object.keys(feats).map(function(key, index){
+					<h5>{this.props.zone.name}</h5>
+					{feats.map(function(feat, index){
 						return(
-							<div className="report-feat">
-								{feats[key].empty ?
-									<NewReportFeat/>
-									: <ReportFeat key={index} name={key} feat={feats[key]}/>
-								}
-								<NewReportFeatButton key={index} name={key}/>
+							<div key={'feat-div-'+index} className="report-feat">
+								<ReportFeat key={'feat-' + index}
+									index={index}
+									feat={feat}
+									pushUpdate={_this.props.pushUpdate}
+									zoneName={_this.props.zone.name}/>
+								<NewReportFeatButton key={'feat-button-'+index}
+									index={index}
+									pushUpdate={_this.props.pushUpdate}
+									zoneName={_this.props.zone.name}/>
 							</div>
 						);
 					})}
@@ -112,34 +156,64 @@ var ReportZone = React.createClass({
 	}
 });
 var NewReportZoneButton = React.createClass({
+	getInitialState: function() {
+        return { showForm: false };
+    },
+    showForm: function(e) {
+		e.preventDefault();
+        this.setState({ showForm: true });
+    },
+	handleCancel: function(e){
+		e.preventDefault();
+		this.setState({ showForm: false });
+	},
+	handleSubmit: function({formData}){
+		utils.formUtils.createNewZone(this.props.index, formData.title, formData.title, formData.title);
+		this.setState({ showForm: false });
+		this.props.pushUpdate();
+	},
 	render: function(){
-		/*TODO: Add Zone immediately after this one, show it*/
-		return (<button type="button">Add Zone</button>);
-	}
-});
-var NewReportZone = React.createClass({
-	/*TODO: New Zone Form */
-	render: function(){
-		return null;
+		return(
+			<div className="new-report">
+				{ !this.state.showForm ?
+					(<button type="button" onClick={this.showForm}>Create New Zone</button>)
+					:null
+				}
+				{ this.state.showForm ?
+					(<div className="new-report-form">
+						<ReactJSONForm schema={utils.formUtils.getNewZoneSchema()}
+							uiSchema={utils.formUtils.getNewZoneUISchema()}
+							onSubmit={this.handleSubmit}
+							noValidate={true}/>
+						<a href="#" onClick={this.handleCancel}>Cancel</a>
+					</div>)
+					: null
+				}
+			</div>
+		);
 	}
 });
 var ReportBody = React.createClass({
+	getInitialState: function(){
+		return {zones: utils.dataUtils.getActiveReport().zones};
+	},
+	pushUpdate: function(){
+		this.setState({zones: utils.dataUtils.getActiveReport().zones});
+	},
 	render: function(){
-		var zones = utils.dataUtils.getActiveReport().zones;
+		var _this = this;
+
 		/*TODO: Add Carousel code here (may need to integrate React component) */
-		if(zones === undefined || zones === null || Object.keys(zones).length > 0){
-			return(<NewReportZoneButton key={0} name={null}/>);
+		if(this.state.zones === undefined || this.state.zones === null || this.state.zones.length == 0){
+			return(<NewReportZoneButton key={0} pushUpdate={_this.pushUpdate}/>);
 		}
 		return (
 			<div id="report-body" className="slider">
-				{Object.keys(zones).map(function(key, index){
+				{this.state.zones.map(function(zone, index){
 					return(
-						<div className="slide">
-							{zones[key].empty ?
-								<NewReportZone/>
-								: <ReportZone key={index} name={key} zone={zones[key]}/>
-							}
-							<NewReportZoneButton key={index} name={key}/>
+						<div key={'zone-div-'+index} className="slide">
+							<ReportZone key={'zone-' + index} index={index} zone={zone} pushUpdate={_this.pushUpdate}/>
+							<NewReportZoneButton key={'zoneButton-' + index} index={index} pushUpdate={_this.pushUpdate}/>
 						</div>);
 				})}
 			</div>

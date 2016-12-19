@@ -4,13 +4,34 @@ var reportUtils = require('./reportUtils.js');
 var globalUtils = require('./globalUtils.js');
 
 var dataUtils = {
+	getZoneByName: function(zones, name){
+		for(var i=0;i<zones.length(); i++){
+		    if(zones[i].name === name){
+				return zones[i];
+			}
+		};
+	},
+	getFeatByName: function(feats, name){
+		for(var i=0;i<feats.length(); i++){
+		    if(feats[i].name === name){
+				return feats[i];
+			}
+		};
+	},
+	pushReportData: function(report){
+		var db = this.getReportDatabase();
+		var reports = db.reports;
+		reports[this.getActiveReportKey()] = report;
+		db.reports = reports;
+		this.setReportDatabase(db);
+	},
 	getReports: function(){
 		return this.getReportDatabase().reports;
 	},
 	getReportDatabase: function(){
 		return this.getStorageJSON(constants.REPORT_DATABASE);
 	},
-	setReportDatabae: function(reports){
+	setReportDatabase: function(reports){
 		this.setStorageJSON(constants.REPORT_DATABASE,reports);
 	},
 	hasActiveReport: function(){
@@ -34,7 +55,7 @@ var dataUtils = {
 		return JSON.parse(localStorage.getItem(key));
 	},
 	initReportDatabase: function(){
-		this.setReportDatabae({client:{},reports:{}});
+		this.setReportDatabase({client:{},reports:{}});
 	},
 	init: function(){
 		if(!localStorage.getItem(constants.ACTIVE_REPORT)){
