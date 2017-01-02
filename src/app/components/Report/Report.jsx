@@ -37,7 +37,6 @@ var ReportHeader = React.createClass({
 		);
 	}
 });
-
 var ReportSubmit = React.createClass({
 	render: function(){
 		return <div id="report-submit"></div>;
