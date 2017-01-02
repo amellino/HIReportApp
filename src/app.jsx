@@ -1,4 +1,6 @@
 /*TODO:
+	* Add support for Pictures (upgrade form JSON? Write own forms JSON?)
+	*
 	* Convert to React ES6/7
 		* Update Browserify / babelify / watchify to support it
 	*

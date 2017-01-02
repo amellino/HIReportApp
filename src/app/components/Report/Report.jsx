@@ -119,7 +119,6 @@ var ReportAppBody = React.createClass({
 		return (
 			<div id="report-body-container">
 				{utils.dataUtils.hasActiveReport() ? <Report key={this.props.doUfullUpdatepdate} fullUpdate={this.props.fullUpdate} updateApp={this.props.updateApp}/> : null}
-				<NewReport updateApp={this.props.updateApp}/>
 			</div>
 		);
     }
@@ -131,6 +130,7 @@ var AppMenu = React.createClass({
 			<div className="hamburger">
 				<BurgerMenu {...settings}>
 					<ReportTitleList updateApp={this.props.updateApp}/>
+					<NewReport updateApp={this.props.updateApp}/>
 				</BurgerMenu>
 			</div>);
     }
