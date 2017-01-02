@@ -7,7 +7,7 @@ var ReportTitle = React.createClass({
 		e.preventDefault();
 		/* TODO: Save current report */
 		utils.dataUtils.setActiveReport(this.props.report);
-		this.props.updateApp();
+		this.props.updateApp(true);
 	},
 	render: function(){
 		return (

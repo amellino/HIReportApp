@@ -1,21 +1,38 @@
 var React = require('react');
 var ReactDOM = require('react-dom');
 var ReactJSONForm = require('react-jsonschema-form');
-var utils = require('../../utils/utils.js');
+var BurgerMenu = require('react-burger-menu').slide;
 var ReportBody = require('./ReportBody.jsx');
 var ReportTitleList = require('./ReportTitleList.jsx');
 
+var utils = require('../../utils/utils.js');
+
+var fullUpdateToggle = true;
 
 var ReportHeader = React.createClass({
+	getInitialState: function(){
+		return {showDetails: false};
+	},
+	toggleDetails: function(e){
+		e.preventDefault();
+		this.setState({showDetails: !this.state.showDetails});
+	},
 	render: function(){
 		var header = utils.dataUtils.getActiveReport().header;
+		/*TODO: Make detils submenu hover over */
 		return (
 			<div id="report-header">
-				{Object.keys(header).map(function(key, index){
-					return(
-						<p key={index}>{key} : {header[key]}</p>
-					);
-				})}
+				<h2>{header.address}</h2>
+				<div className="report-header-details">
+					<a href="#" onClick={this.toggleDetails}>
+						{(this.state.showDetails) ? "Hide Details" : "Show Details"}
+					</a>
+					{(this.state.showDetails) ? Object.keys(header).map(function(key, index){
+						return(
+							<p key={index}>{key} : {header[key]}</p>
+						);
+					}) : null}
+				</div>
 			</div>
 		);
 	}
@@ -31,7 +48,7 @@ var Report = React.createClass({
 		return (
 		    <div className="report-container">
 				<ReportHeader/>
-				<ReportBody updateApp={this.props.updateApp}/>
+				<ReportBody key={this.props.fullUpdate} updateApp={this.props.updateApp}/>
 				<ReportSubmit/>
 		    </div>
 		);
@@ -79,24 +96,29 @@ var ReportApp = React.createClass({
 	getInitialState:function(){
 		return ({
 			activeReport: utils.dataUtils.getActiveReportKey(),
-			reports: utils.dataUtils.getReports()
+			reports: utils.dataUtils.getReports(),
+			doUpdate: 0
 		});
 	},
-	updateApp: function(){
+	updateApp: function(full){
+		if(full){
+			fullUpdateToggle = !fullUpdateToggle;
+		}
 		this.setState({
 			activeReport: utils.dataUtils.getActiveReportKey(),
-			reports: utils.dataUtils.getReports()
+			reports: utils.dataUtils.getReports(),
+			fullUpdate: fullUpdateToggle
 		});
 	},
 	render: function(){
-		return (<div id="report-app"><AppMenu updateApp={this.updateApp}/><AppHeader/><ReportAppBody updateApp={this.updateApp}/><AppFooter/></div>);
+		return (<div id="report-app"><AppMenu updateApp={this.updateApp}/><AppHeader/><ReportAppBody fullUpdate={this.state.fullUpdate} updateApp={this.updateApp}/><AppFooter/></div>);
     }
 });
 var ReportAppBody = React.createClass({
 	render: function(){
 		return (
 			<div id="report-body-container">
-				{utils.dataUtils.hasActiveReport() ? <Report updateApp={this.props.updateApp}/> : null}
+				{utils.dataUtils.hasActiveReport() ? <Report key={this.props.doUfullUpdatepdate} fullUpdate={this.props.fullUpdate} updateApp={this.props.updateApp}/> : null}
 				<NewReport updateApp={this.props.updateApp}/>
 			</div>
 		);
@@ -104,8 +126,13 @@ var ReportAppBody = React.createClass({
 });
 var AppMenu = React.createClass({
 	render: function(){
-		/*TODO: React Hamburger Menu: react-hamburger-menu or react-burger-menu*/
-		return (<div className="hamburger"><ReportTitleList updateApp={this.props.updateApp}/></div>);
+		var settings={}
+		return (
+			<div className="hamburger">
+				<BurgerMenu {...settings}>
+					<ReportTitleList updateApp={this.props.updateApp}/>
+				</BurgerMenu>
+			</div>);
     }
 });
 var AppHeader = React.createClass({

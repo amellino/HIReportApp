@@ -55,7 +55,7 @@ var dataUtils = {
 		return JSON.parse(localStorage.getItem(key));
 	},
 	initReportDatabase: function(){
-		this.setReportDatabase({client:{},reports:{}});
+		this.setReportDatabase({client:{},reports:{},predefined:{zones:[],feats:[],reports:[]}});
 	},
 	init: function(){
 		if(!localStorage.getItem(constants.ACTIVE_REPORT)){

@@ -1,5 +1,32 @@
-
-.hide-submit button[type=submit]{display:none;}
+/*Global*/
+/*.hide-submit button[type=submit]{display:none;}*/
 .show{display:block;padding:5px;margin:15px;}
-.slider{width:1000px;}
-.slide{width:150px; height:500px;float:left;}
+
+/*Report Header*/
+#report-header{width:100%;text-align:center;margin-bottom:50px;}
+.report-header-details{position:absolute;width:100%;text-align:center;background-color:white;}
+
+/*Slider*/
+.slider-container {
+  margin: 0 auto;
+  padding: 30px;
+  width: 80%;
+}
+
+/*Burger Menu*/
+/* Position and sizing of burger button */
+.bm-burger-button {position:fixed; width:36px; height:30px; left:36px; top:36px;}
+/* Color/shape of burger icon bars */
+.bm-burger-bars {background:#373a47;}
+/* Position and sizing of clickable cross button */
+.bm-cross-button {height:24px; width:24px;}
+/* Color/shape of close button cross */
+.bm-cross {background:#bdc3c7;}
+/* General sidebar styles */
+.bm-menu {background:#373a47; padding:2.5em 1.5em 0; font-size:1.15em;}
+/* Morph shape necessary with bubble or elastic */
+.bm-morph-shape {fill:#373a47;}
+/* Wrapper for item list */
+.bm-item-list {color:#b8b7ad; padding:0.8em;}
+/* Styling of overlay */
+.bm-overlay {background: rgba(0, 0, 0, 0.3);}
