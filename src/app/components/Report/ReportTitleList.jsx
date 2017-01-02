@@ -11,10 +11,10 @@ var ReportTitle = React.createClass({
 	},
 	render: function(){
 		return (
-			<li className="report-list-item">
-				<a href="#" onClick={this.loadReport}>
+			<li className="report-list-item list-unstyled">
+				<button type="button" className="btn btn-info btn-xs saved-reports" onClick={this.loadReport}>
 				{this.props.report}
-				</a>
+				</button>
 			</li>
 		);
 	}

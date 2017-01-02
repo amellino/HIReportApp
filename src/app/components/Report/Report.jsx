@@ -19,18 +19,19 @@ var ReportHeader = React.createClass({
 	},
 	render: function(){
 		var header = utils.dataUtils.getActiveReport().header;
-		/*TODO: Make detils submenu hover over */
 		return (
-			<div id="report-header">
+			<div id="report-header" className="text-center">
 				<h2>{header.address}</h2>
-				<div className="report-header-details">
+				<div className="report-header-details text-center">
 					<a href="#" onClick={this.toggleDetails}>
 						{(this.state.showDetails) ? "Hide Details" : "Show Details"}
 					</a>
 					{(this.state.showDetails) ? Object.keys(header).map(function(key, index){
-						return(
-							<p key={index}>{key} : {header[key]}</p>
-						);
+						if(key === 'address'){
+							return(<address key={index}>{header[key]}</address>);
+						} else {
+							return(<p key={index}>{key} : {header[key]}</p>);
+						}
 					}) : null}
 				</div>
 			</div>
@@ -74,7 +75,9 @@ var NewReport = React.createClass({
 		return(
 			<div className="new-report">
 				{ !this.state.showForm ?
-					(<button type="button" onClick={this.showForm}>Create New Report</button>)
+					(<button className="btn btn-default" type="button"
+						onClick={this.showForm}> Create New Report
+					</button>)
 					:null
 				}
 				{ this.state.showForm ?
@@ -128,6 +131,10 @@ var AppMenu = React.createClass({
 		return (
 			<div className="hamburger">
 				<BurgerMenu {...settings}>
+					<div className="logo">
+						<img src="http://placehold.it/30x30" style={{float:'left'}} alt="logo" class="img-circle"/>
+						<h3>Logo</h3>
+					</div>
 					<ReportTitleList updateApp={this.props.updateApp}/>
 					<NewReport updateApp={this.props.updateApp}/>
 				</BurgerMenu>

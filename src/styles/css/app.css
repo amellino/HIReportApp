@@ -3,19 +3,22 @@
 .show{display:block;padding:5px;margin:15px;}
 
 /*Report Header*/
-#report-header{width:100%;text-align:center;margin-bottom:50px;}
-.report-header-details{position:absolute;width:100%;text-align:center;background-color:white;}
+#report-header{width:100%;background-color:#BEBEBE;padding:15px 0 20px 0;}
+#report-header h2{margin:0;}
+.report-header-details{position:absolute;width:100%;}
+button.saved-reports {padding:0 50px 0 10px;}
+.logo h3{margin:5px 5px 5px 40px}
+/*Report Features*/
+.report-feat{margin: 10px 10px 25px 7px;}
+button.new-item{margin:10px}
+.report-form-container{padding:11px;}
 
 /*Slider*/
-.slider-container {
-  margin: 0 auto;
-  padding: 30px;
-  width: 80%;
-}
+.slider-container {margin:0 auto; padding:20px; width:80%;}
 
 /*Burger Menu*/
 /* Position and sizing of burger button */
-.bm-burger-button {position:fixed; width:36px; height:30px; left:36px; top:36px;}
+.bm-burger-button {position:fixed; width:20px; height:18px; left:26px; top:26px;}
 /* Color/shape of burger icon bars */
 .bm-burger-bars {background:#373a47;}
 /* Position and sizing of clickable cross button */

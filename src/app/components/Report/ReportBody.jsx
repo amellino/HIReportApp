@@ -23,14 +23,17 @@ var ReportProp = React.createClass({
 	},
 	render: function(){
 		return(
-			<div className="hide-submit">
+			<div className="hide-submit bg-info report-form-container">
 			<ReactJSONForm schema={this.props.schema}
 					uiSchema={this.props.uiSchema}
 					formData={this.props.formData}
 					onChange={this.handleChange}
 					onSubmit={this.handleSubmit}
 					noValidate={true}/>
-			{this.props.deleteButton ? <a href="#" onClick={this.handleDeleteFeat}>Delete Feature</a> : null}
+			{this.props.deleteButton ?
+				<button className="btn btn-danger" type="button"
+					onClick={this.handleDeleteFeat}>-</button>
+					: null}
 			</div>
 		);
 	}
@@ -39,18 +42,15 @@ var ReportFeat = React.createClass({
 	render: function(){
 		var feat = this.props.feat;
 		return (
-			<div className="report-feat">
-				<h5>{feat.name}</h5>
-				<ReportProp
-					schema={feat.schema}
-					uiSchema={feat.uiSchema}
-					formData={feat.formData}
-					deleteButton={true}
-					index={this.props.index}
-					zoneName={this.props.zoneName}
-					zoneIndex={this.props.zoneIndex}
-					pushUpdate={this.props.pushUpdate}/>
-			</div>
+			<ReportProp
+				schema={feat.schema}
+				uiSchema={feat.uiSchema}
+				formData={feat.formData}
+				deleteButton={true}
+				index={this.props.index}
+				zoneName={this.props.zoneName}
+				zoneIndex={this.props.zoneIndex}
+				pushUpdate={this.props.pushUpdate}/>
 		);
 	}
 });
@@ -75,7 +75,9 @@ var NewReportFeatButton = React.createClass({
 		return(
 			<div className="new-report">
 				{ !this.state.showForm ?
-					(<button type="button" onClick={this.showForm}>Create New Feat</button>)
+					(<button className="btn btn-primary new-item" type="button"
+						onClick={this.showForm}>Create New Feat
+					</button>)
 					:null
 				}
 				{ this.state.showForm ?
@@ -104,23 +106,23 @@ var ReportZone = React.createClass({
 		var feats = this.props.zone.feats;
 		if(feats === undefined || feats === null || Object.keys(feats).length == 0){
 			return(
-				<div>
-					<h5>{this.props.zone.name}</h5>
+				<div className="container">
+					<h3>{this.props.zone.name}</h3>
 					<NewReportFeatButton
 						index={0}
 						pushUpdate={_this.props.pushUpdate}
 						zoneName={_this.props.zone.name}
 						zoneIndex={_this.props.index}/>
-					<a href="#" onClick={this.deleteZone}>Delete Zone</a>
+					<button className="btn btn-danger" type="button" onClick={this.deleteZone}>-</button>
 				</div>
 			);
 		} else {
 			return(
-				<div className="report-zone">
-					<h5>{this.props.zone.name}</h5>
+				<div className="report-zone container">
+					<h3>{this.props.zone.name}</h3>
 					{feats.map(function(feat, index){
 						return(
-							<div key={'feat-div-'+index} className="report-feat">
+							<div key={'feat-div-'+index} className="report-feat container">
 								<ReportFeat
 									key={'feat-' + index}
 									index={index}
@@ -137,7 +139,7 @@ var ReportZone = React.createClass({
 							</div>
 						);
 					})}
-					<a href="#" onClick={this.deleteZone}>Delete Zone</a>
+					<button className="btn btn-danger" type="button" onClick={this.deleteZone}>-</button>
 				</div>
 			);
 		}
@@ -164,7 +166,9 @@ var NewReportZoneButton = React.createClass({
 		return(
 			<div className="new-report">
 				{ !this.state.showForm ?
-					(<button type="button" onClick={this.showForm}>Create New Zone</button>)
+					(<button className="btn btn-primary new-item" type="button"
+						onClick={this.showForm}>Create New Zone
+					</button>)
 					:null
 				}
 				{ this.state.showForm ?
