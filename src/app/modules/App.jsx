@@ -1,19 +1,20 @@
-var React = require('react');
-var Link = require('react-router').Link;
+import React from 'react';
+import Menu from '../components/common/Menu.jsx';
+import ViewHeader from '../components/common/ViewHeader.jsx';
+import View from './View.jsx';
+import ViewFooter from '../components/common/ViewFooter.jsx';
 
-var App = React.createClass({
+class App extends React.Component {
 	render() {
 		return (
-			<div class="view-container">
-				<h1>Inspector Home</h1>
-				<ul role="nav">
-					<li><Link to="/inspector/templates">Templates</Link></li>
-					<li><Link to="/inspector/reports">Reports</Link></li>
-					<li><Link to="/inspector/inspection">Inspection</Link></li>
-				</ul>
+			<div className="">
+				<Menu/>
+				<ViewHeader/>
+				<View component={this.props.children}/>
+				<ViewFooter/>
 			</div>
 		);
 	}
-});
+};
 
 module.exports = App;

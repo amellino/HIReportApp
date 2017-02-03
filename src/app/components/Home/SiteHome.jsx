@@ -10,4 +10,4 @@ var SiteHome = React.createClass({
 	}
 });
 
-modulde.exports = SiteHome;
+module.exports = SiteHome;

@@ -13,26 +13,24 @@ var IndexRoute = require('react-router').IndexRoute;
 var browserHistory = require('react-router').browserHistory;
 
 var App = require('./app/modules/App.jsx');
-var AppHome = require('./app/modules/App.jsx');
-var InspectorHome = require('./app/modules/App.jsx');
-var TemplateEditor = require('./app/modules/App.jsx');
-var InspectionEditor = require('./app/modules/App.jsx');
-var CustomerHome = require('./app/modules/App.jsx');
-var SiteHome = require('./app/modules/App.jsx');
+var AppHome = require('./app/modules/AppHome.jsx');
+var InspectorHome = require('./app/components/home/InspectorHome.jsx');
+var Template = require('./app/components/inspector/Template.jsx');
+var Inspection = require('./app/components/inspector/Inspection.jsx');
+var CustomerHome = require('./app/components/home/CustomerHome.jsx');
+var SiteHome = require('./app/components/home/SiteHome.jsx');
 var NoMatch = require('./app/modules/App.jsx');
 
 ReactDOM.render((
 	<Router history={browserHistory}>
 		<Route path="/" component={App}>
 			<IndexRoute component={AppHome}/>
-			<Route path="/inspector" component={InspectorHome}>
-				<Route path="/templates" component={TemplateEditor}/>
-				<Route path="/inspection" component={InspectionEditor}/>
-				<Route path="/inspection/:iid" component={InspectionEditor}/>
-			</Route>
+			<Route path="/inspector" component={InspectorHome}/>
+			<Route path="/inspector/template" component={Template}/>
+			<Route path="/inspector/inspection" component={Inspection}/>
 			<Route path="/customer" component={CustomerHome}/>
 			<Route path="/site" component={SiteHome}/>
-			<Route path="*" component={Error}/>
+			<Route path="*" component={NoMatch}/>
 		</Route>
 	</Router>
 ), document.getElementById('root'));

@@ -10,4 +10,4 @@ var CustomerHome = React.createClass({
 	}
 });
 
-modulde.exports = CustomerHome;
+module.exports = CustomerHome;
